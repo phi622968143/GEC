@@ -1,0 +1,54 @@
+1, 
+   Config( back.backend.API & Test ), 
+   
+   React.frontend  & learn( crashcourse ) 
+   
+   + slm xd
+
+2, Fin back frontend , 
+   More design of front system (SDP)
+
+Single Obj
+   
+   Get information v Aug.14 ProductDetail  Aug.20 demo-all Q test mod
+   List query problem muti admin
+   Post   Product  v Aug.16 Product Upload 
+   Delete Product  v Aug 22
+   
+   Update Product  
+   
+   Bootstrap
+libray
+
+      Aug.21 a.foreach(i=>{})
+
+SPEC for back : supplyment alarm, hot sale (crawler).
+
+find  C ? A:B  && https://www.fooish.com/reactjs/conditional-rendering.html
+
+
+Aug 28 = {
+          D:redesign DB(Customer,Order,OrderDetail), write order API,
+          Q:Lname,tz(front process)
+}
+
+Sep 5={
+   know:url/<type:var>,
+   do:view,delete_cart,
+}
+
+Sep 16={
+   react router to pass args intercomponently,
+   URLSearchParams
+}
+
+Sep 21={
+   ProductPage to CartPage has render pb(undefine map)
+   related query
+   use serialize data to fix pb
+   tz of dj
+}
+
+Sep 23={
+   GetOrder
+}
