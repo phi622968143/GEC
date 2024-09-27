@@ -134,6 +134,6 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  
+    "http://localhost:1140",  
 #     "https://yourfrontenddomain.com",  # 你的生产环境前端域名
 ]

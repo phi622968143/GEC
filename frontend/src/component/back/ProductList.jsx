@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ProductDelete from "./ProductDelete";
@@ -11,24 +12,29 @@ function ProductList() {
   const [productAudios, setProductAudios] = useState({});
   const [Order, setOrder] = useState({});
   const [error, setError] = useState(null);
-  const [updateSelected,setUpdateSelected]=useState(null);
+  const [updateSelected, setUpdateSelected] = useState(null);
   const [clicked, setClicked] = useState(false);
-  const pageChange=()=>{window.location.href="http://localhost:3000/upload"};
-  const handleClick=(img)=>{setUpdateSelected(img)} ;
-  const handleClose=()=>{setUpdateSelected(null)};
+  const navigate = useNavigate();
+  const pageChange = () => {
+    window.location.href = "http://localhost:1140/upload";
+  };
+  const handleClick = (img) => {
+    setUpdateSelected(img);
+  };
+  const handleClose = () => {
+    setUpdateSelected(null);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch product data
-        const productResponse = await axios.get(
-          `${BackendURL}api/product`
-        );
+        const productResponse = await axios.get(`${BackendURL}api/product`);
         const products = productResponse.data; //body
         setProductData(products);
 
         // // Fetch product images
-        const imgResponse = await axios.get( `${BackendURL}api/img`);
+        const imgResponse = await axios.get(`${BackendURL}api/img`);
         const images = imgResponse.data;
         const imagesByProduct = {};
         images.forEach((img) => {
@@ -40,9 +46,7 @@ function ProductList() {
         setProductImages(imagesByProduct);
 
         // // Fetch product audios
-        const audioResponse = await axios.get(
-          `${BackendURL}api/audio`
-        );
+        const audioResponse = await axios.get(`${BackendURL}api/audio`);
         const audios = audioResponse.data;
         const audiosByProduct = {};
         audios.forEach((audio) => {
@@ -53,16 +57,11 @@ function ProductList() {
         });
         setProductAudios(audiosByProduct);
 
-        const orderResponse=axios.get(
-          `${BackendURL}api/order/get`
-        )
-        console.log(orderResponse.data)
-
-
+        const orderResponse = axios.get(`${BackendURL}api/order/get`);
+        console.log(orderResponse.data);
       } catch (err) {
         setError("Failed to fetch data");
       }
-
     };
 
     fetchData();
@@ -72,7 +71,8 @@ function ProductList() {
   }
 
   if (!productData.length) {
-    return <div>Loading...</div>;
+    navigate("/upload");
+    return null;
   }
 
   const CATEGORY_CHOICES = [
@@ -98,11 +98,11 @@ function ProductList() {
   const getSkillLevelName = (skillLevelValue) => {
     return skillLevels[skillLevelValue] || skillLevelValue;
   };
- 
 
   return (
     <div className="container mt-5">
-      <h1>產品列表</h1><p>點擊照片可以更新,刪除是將整個產品刪除ㄛ！</p>
+      <h1>產品列表</h1>
+      <p>點擊照片可以更新,刪除是將整個產品刪除ㄛ！</p>
       <table className="table table-striped">
         <thead>
           <tr>
@@ -141,33 +141,38 @@ function ProductList() {
               </td>
               <td>
                 {/* Display images */}
-                { 
-                  productImages[product.id]?(
+                {productImages[product.id] ? (
                   productImages[product.id].map((img) =>
-                  img.primary ? (
-                    <div key={img.id}>
-                      <img
-                        src={BackendURL + img.img}
-                        onClick={() => handleClick(img)}
-                        alt={`Product ${product.name}`}
-                        width="50"
-                        height="50"
-                        style={{ cursor: 'pointer' }} 
-                      />
-                      {/* Ensure that ProductUpdate is displayed conditionally */}
-                      {updateSelected && updateSelected.id === img.id && (
-                        <ProductUpdate
-                          productImg={updateSelected}
-                          onClose={handleClose}
+                    img.primary ? (
+                      <div key={img.id}>
+                        <img
+                          src={BackendURL + img.img}
+                          onClick={() => handleClick(img)}
+                          alt={`Product ${product.name}`}
+                          width="50"
+                          height="50"
+                          style={{ cursor: "pointer" }}
                         />
-                      )}
-                    </div>
-                  ) : null
+                        {/* Ensure that ProductUpdate is displayed conditionally */}
+                        {updateSelected && updateSelected.id === img.id && (
+                          <ProductUpdate
+                            productImg={updateSelected}
+                            onClose={handleClose}
+                          />
+                        )}
+                      </div>
+                    ) : null
                   )
-                  ) :(
+                ) : (
                   <div>
-                    <button onClick={() => {setClicked(!clicked);
-                      handleClick(product)}}>設定圖片</button>
+                    <button
+                      onClick={() => {
+                        setClicked(!clicked);
+                        handleClick(product);
+                      }}
+                    >
+                      設定圖片
+                    </button>
                     {clicked && (
                       <ProductUpdate
                         productImg={updateSelected}
@@ -175,9 +180,7 @@ function ProductList() {
                       />
                     )}
                   </div>
-                  ) 
-                }
-
+                )}
               </td>
               <td>
                 {/* Display audios */}
@@ -196,15 +199,20 @@ function ProductList() {
                   ))}
               </td>
               <td>
-              <ProductDelete productId={product.id} onDelete={(id) => {
-                setProductData(productData.filter(p => p.id !== id));//wanted not eq to del id(exist)
-              }} />
-            </td>
+                <ProductDelete
+                  productId={product.id}
+                  onDelete={(id) => {
+                    setProductData(productData.filter((p) => p.id !== id)); //wanted not eq to del id(exist)
+                  }}
+                />
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <button type="button" class="btn btn-secondary" onClick={pageChange}>上傳頁</button>
+      <button type="button" className="btn btn-secondary" onClick={pageChange}>
+        上傳頁
+      </button>
     </div>
   );
 }
