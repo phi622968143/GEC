@@ -204,7 +204,7 @@ function ProductList() {
           ))}
         </tbody>
       </table>
-      <button type="button" class="btn btn-secondary" onClick={pageChange}>上傳頁</button>
+      <button type="button" className="btn btn-secondary" onClick={pageChange}>上傳頁</button>
     </div>
   );
 }
