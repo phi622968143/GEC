@@ -30,6 +30,6 @@ The origin setting is return Loading if there's no product on list
 I modified it to navigate to /upload if there's no product on list  
 ### Other
 - If U don't want to use TypeScript, please delete frontend_ts directory after git clone  
-- If U only want to use TypeScript, please delete frontend directory after git clone
+- If U only want to use TypeScript, please delete frontend directory after git clone  
 __Good Luck__  
 Aaron 00:39 Oct 3. '24
