@@ -1,3 +1,10 @@
+## Required
+### Frontend
+- install axios
+- install react-script
+- install react-router-dom
+- install Tailwind CSS
+### Backend
 ## Backend
 
 for backend you need to add media dir  
@@ -21,5 +28,8 @@ Change the styling from __Bootstrap__ to __Tailwind CSS__
 ### ProductList
 The origin setting is return Loading if there's no product on list  
 I modified it to navigate to /upload if there's no product on list  
+### Other
+- If U don't want to use TypeScript, please delete frontend_ts directory after git clone  
+- If U only want to use TypeScript, please delete frontend directory after git clone
 __Good Luck__  
-Aaron 00:28 Oct 3. '24
+Aaron 00:39 Oct 3. '24
