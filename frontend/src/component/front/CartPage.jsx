@@ -21,7 +21,6 @@ const CartPage = () => {
 
           console.log(res.data);
           setCartItems(res.data);
-          
           res.data.product_info.forEach((product)=>{
             fetchProductImgs(product.id)
           })
@@ -43,7 +42,7 @@ const CartPage = () => {
         }
     }
         fetchCartItems();
-    }, [usr_id]);
+    }, []);
     
     const handleDeal = async (product_id) => {
         try {
@@ -73,34 +72,40 @@ const CartPage = () => {
             }
         }
     };
+    
     return (
         <div>
         <h1>Cart for User {usr_id}</h1>
         <div>CartPage</div>
        
-        <div>
-            {cartItems && cartItems.length > 0 ? (
-                cartItems.map((item) => (
-                    <div key={item.product_info.id} className="cart-item">
-                        <h3>{item.product_info.name}</h3>
-                        {productImages[item.product_info.id] && productImages[item.product_info.id].length > 0 ? (
+        {cartItems.product_info && cartItems.product_info.length > 0 ? (
+                cartItems.product_info.map((item) => (
+                    <div key={item.id} className="cart-item">
+                        <h3>{item.name}</h3>
+                        
+
+                        {productImages[item.id] && productImages[item.id].length > 0 ? (
                             <img 
-                                src={`${BackendServerURL}${productImages[item.product_info.id][0].img}`} 
-                                alt={item.product_info.name} 
+                                src={BackendServerURL+productImages[item.id][0].img} 
+                                alt={item.name} 
                                 style={{ width: '150px' }} 
                             />
                         ) : (
                             <p>No images available</p>
                         )}
-                        <p>Quantity: {item.cart_items.quantity}</p>
-                        <button onClick={() => handleDeal(item.cart_items.id)}>Checkout</button>
-                        <button onClick={() => handleDelete(item.cart_items.id)}>Delete</button>
+                        <p>Quantity: {item.num}</p>
+
+                        <button onClick={() => handleDeal(item.id)}>
+                            Checkout
+                        </button>
+                        <button onClick={() => handleDelete(item.id)}>
+                            Delete
+                        </button>
                     </div>
                 ))
             ) : (
-                <p>No items in the cart</p>
-            )}
-        </div> <h3>{cartItems.total_price}</h3>
+                <p>No items in the cart.</p>
+            )} <h3>{cartItems.total_price}</h3>
         
     </div>
     )
