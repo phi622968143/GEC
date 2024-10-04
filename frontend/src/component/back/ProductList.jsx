@@ -4,6 +4,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import ProductDelete from "./ProductDelete";
 import ProductUpdate from "./ProductUpdate";
 import ProductUpload from "./ProductUpload";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 function ProductList() {
   const BackendURL = "http://127.0.0.1:8000/";
   const [productData, setProductData] = useState([]);
