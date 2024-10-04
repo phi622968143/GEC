@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import CartPage  from './CartPage';
 //view onclick and pass id
 //add :when usr click add to cart post payload to back
 const CATEGORY_CHOICES = [
@@ -52,12 +53,17 @@ const ProductPage = () => {
     });
 
   }
+  const handleToCartClick=()=>{
+    window.location.href ="/cart/1"
+
+  }
   return (
     
     <div className="container mt-4">
       
       {console.log(productData[0])}
       <h1 className="mb-4">GEC</h1>
+     <button onClick={()=>{handleToCartClick()}}>Cart</button>
       <div className="category-buttons mb-4">
         {/* loop hover */}
         {CATEGORY_CHOICES.map((category) => (
