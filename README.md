@@ -28,6 +28,9 @@ Change the styling from __Bootstrap__ to __Tailwind CSS__
 ### ProductList
 The origin setting is return Loading if there's no product on list  
 I modified it to navigate to /upload if there's no product on list  
+### CartPage
+I fixed the problem about delete item  
+Delete the item that cart_items === product.id
 ### Other
 - If U don't want to use TypeScript, please delete frontend_ts directory after git clone  
 - If U only want to use TypeScript, please delete frontend directory after git clone  
