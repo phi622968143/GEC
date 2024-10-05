@@ -5,9 +5,21 @@ const BackendAPIURL = "http://127.0.0.1:8000/api/";
 const BackendServerURL="http://127.0.0.1:8000/"
 
 const CartPage = () => {
-    const [cartItems, setCartItems] = useState([]);
+    const [cartItems, setCartItems] = useState(
+        {
+            cart_items: [
+              { id: 4, quantity: 0, date_added: '', customer: 0, product: 0 },
+              
+            ],
+            product_info: [
+              { id: 22, name: '', price: 0, brand: '', num: 0 },
+            ],
+            total_price: 0
+          }
+);
     const [orderSubmitted, setOrderSubmitted] = useState(false);
     const [productImages,setProductImages]=useState({});
+    const [loading, setLoading] = useState(true);
     const {usr_id}=useParams();
     // console.log(usr_id);
 
@@ -19,8 +31,9 @@ const CartPage = () => {
         try {
           const res = await axios.get(`${BackendAPIURL}cart/view/${usr_id}`);
 
-          console.log(res.data);
+        //   console.log(res.data);
           setCartItems(res.data);
+          setLoading(false);
           res.data.product_info.forEach((product)=>{
             fetchProductImgs(product.id)
           })
@@ -36,7 +49,7 @@ const CartPage = () => {
                 ...prevState,
                 [product_id]: res.data 
             }));
-            console.log(res.data)
+            // console.log(res.data)
         }catch(e){
             console.log(e)
         }
@@ -77,28 +90,30 @@ const CartPage = () => {
         <div>
         <h1>Cart for User {usr_id}</h1>
         <div>CartPage</div>
-       
-        {cartItems.product_info && cartItems.product_info.length > 0 ? (
-                cartItems.product_info.map((item) => (
-                    <div key={item.id} className="cart-item">
-                        <h3>{item.name}</h3>
+   
+        {loading ? (
+            <p>Loading...</p>
+        ) :cartItems.length > 0 ? (
+                cartItems.map((item) => (
+                    <div key={item.product_info.id} className="cart-item">
+                        <h3>{item.product_info.name}</h3>
                         
 
-                        {productImages[item.id] && productImages[item.id].length > 0 ? (
+                        {productImages[item.product_info.id] && productImages[item.product_info.id].length > 0 ? (
                             <img 
-                                src={BackendServerURL+productImages[item.id][0].img} 
-                                alt={item.name} 
+                                src={BackendServerURL+productImages[item.product_info.id][0].img} 
+                                alt={item.product_info.name} 
                                 style={{ width: '150px' }} 
                             />
                         ) : (
                             <p>No images available</p>
                         )}
-                        <p>Quantity: {item.num}</p>
+                        <p>Quantity: {item.product_info.num}</p>
 
-                        <button onClick={() => handleDeal(item.id)}>
+                        <button onClick={() => handleDeal(item.cart_items.id)}>
                             Checkout
                         </button>
-                        <button onClick={() => handleDelete(item.id)}>
+                        <button onClick={() => handleDelete(item.cart_items.id)}>
                             Delete
                         </button>
                     </div>
