@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-//view onclick and pass id
-//add :when usr click add to cart post payload to back
+
 const CATEGORY_CHOICES = [
   { id: 1, name: "Electric Guitar" },
   { id: 2, name: "Amplifier" },
@@ -39,6 +38,7 @@ const ProductPage = () => {
   const handleCategoryClick = (categoryId) => {
     setSelectedCategory(categoryId);
   };
+
   const handleAddCartClick = async (product_id) => {
     try {
       const response = await axios.post(`${BackendURL}cart/add`, {
@@ -54,7 +54,7 @@ const ProductPage = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => navigate("/cart/1"),
+        onClose: () => navigate("/cart/1"), // 加入購物車後跳轉
       });
     } catch (error) {
       console.error("加入購物車API出錯: ", error);
@@ -72,14 +72,17 @@ const ProductPage = () => {
     }
   };
 
+  const handleToCartClick = () => {
+    window.location.href = "/cart/1";
+  };
+
   return (
     <div className="container mx-auto mt-4">
       <ToastContainer />
-      {console.log(productData[0])}
-      <h1 className="mb-4 text-2xl font-bold">GEC</h1>
-
-      {/* Category buttons */}
-      <div className="mb-4">
+      <h1 className="mb-4">GEC</h1>
+      <button onClick={handleToCartClick}>Cart</button>
+      <div className="category-buttons mb-4">
+        {/* loop hover */}
         {CATEGORY_CHOICES.map((category) => (
           <button
             key={category.id}

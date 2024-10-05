@@ -20,8 +20,12 @@ def GetProduct(request):
 
 @api_view(['GET'])
 def GetPic(request):
+    product_id=request.query_params.get('product_id')
     try:
-        images = ProductImg.objects.all()
+        if product_id:
+            images = ProductImg.objects.filter(product_id=product_id)
+        else:
+            images = ProductImg.objects.all()
         serializer = ProductImgSerializer(images, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
@@ -212,9 +216,9 @@ def product_page(req,category):
     return Response(products_data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-def view_cart(req,user_id):
+def view_cart(req,usr_id):
    
-    cart_items = CartItem.objects.filter(customer=user_id)
+    cart_items = CartItem.objects.filter(customer=usr_id)
     tot_price = sum(item.product.price * item.quantity for item in cart_items)
     cart_item_serializer = CartItemSerializer(cart_items, many=True)
     
@@ -252,12 +256,15 @@ def add_to_cart(req):
             return Response(status=status.HTTP_404_NOT_FOUND)
     else:
         return Response("invalid")
+
 @api_view(['DELETE'])
 def delete_cart_item(req,item_id):
-    item=CartItem.objects.get(id=item_id)
-    item.delete()
-    serializer = CartItemSerializer(item)
-    return Response(serializer.data, status=200)
+    try:
+        item=CartItem.objects.get(id=item_id)
+        item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    except CartItem.DoesNotExist:
+        return Response({'error': 'Item not found or does not belong to the user.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 #OAuth

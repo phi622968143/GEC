@@ -52,3 +52,8 @@ Sep 21={
 Sep 23={
    GetOrder
 }
+
+
+Oct 4={
+   useEffect & CartPage info & delete
+}
