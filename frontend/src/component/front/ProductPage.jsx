@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 //view onclick and pass id
 //add :when usr click add to cart post payload to back
 const CATEGORY_CHOICES = [
@@ -39,21 +40,41 @@ const ProductPage = () => {
     setSelectedCategory(categoryId);
   };
   const handleAddCartClick = async (product_id) => {
-    const res = await axios
-      .post(`${BackendURL}cart/add`, {
-        customer: 1,
+    try {
+      const response = await axios.post(`${BackendURL}cart/add`, {
+        customer: 1, // 如果需要，可以替換1為動態的顧客ID
         product: product_id,
-      })
-      .then(function (response) {
-        console.log(response);
-        navigate("/cart/1");
-      })
-      .catch(function (error) {
-        console.log(error);
       });
+      console.log("加入購物車API返回數據: ", response.data);
+      toast.success("商品成功加入購物車!", {
+        position: "top-right",
+        autoClose: 1500, // 1.5秒後自動關閉
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        onClose: () => navigate("/cart/1"),
+      });
+    } catch (error) {
+      console.error("加入購物車API出錯: ", error);
+      toast.error("商品加入購物車失敗!", {
+        position: "top-right",
+        autoClose: 1500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      console.log(error.response ? error.response.data : error.message);
+    }
   };
+
   return (
     <div className="container mx-auto mt-4">
+      <ToastContainer />
       {console.log(productData[0])}
       <h1 className="mb-4 text-2xl font-bold">GEC</h1>
 

@@ -104,9 +104,9 @@ function ProductList() {
       <h1 className="text-2xl font-bold mb-4">產品列表</h1>
       <p className="mb-6">點擊照片可以更新, 刪除是將整個產品刪除ㄛ！</p>
 
-      <table className="table-auto w-full text-left border-collapse">
+      <table className="table-auto w-full hover:shadow-lg rounded-lg text-left border-collapse">
         <thead>
-          <tr className="bg-gray-200">
+          <tr className="bg-purple-400">
             <th className="p-3 border">名稱</th>
             <th className="p-3 border">價格</th>
             <th className="p-3 border">品牌</th>
@@ -122,7 +122,7 @@ function ProductList() {
         <tbody>
           {/* Pass product obj use its id to print img and audio */}
           {productData.map((product) => (
-            <tr key={product.id} className="hover:bg-gray-100">
+            <tr key={product.id} className="bg-purple-100 hover:bg-purple-200">
               <td className="p-3 border">{product.name}</td>
               <td className="p-3 border">{product.price}</td>
               <td className="p-3 border">{product.brand}</td>
