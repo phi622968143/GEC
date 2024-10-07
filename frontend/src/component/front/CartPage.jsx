@@ -5,7 +5,7 @@ const BackendAPIURL = "http://127.0.0.1:8000/api/";
 const BackendServerURL="http://127.0.0.1:8000/"
 
 const CartPage = () => {
-    const [cartItems, setCartItems] = useState(
+    const [carItems, setCartItems] = useState(
         {
             cart_items: [
               { id: 4, quantity: 0, date_added: '', customer: 0, product: 0 },
