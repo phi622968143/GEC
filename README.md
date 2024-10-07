@@ -28,8 +28,53 @@ Change the styling from __Bootstrap__ to __Tailwind CSS__
 ### ProductList
 The origin setting is return Loading if there's no product on list  
 I modified it to navigate to /upload if there's no product on list  
+### CartPage
+I fixed the problem about delete item  
+Delete the item that cart_items.product === product.id  
+in the return, cartItem is cartItems.cart_items, product is cartItem.product_info
+```js
+cartItems.cart_items.map((cartItem) => {
+          const product = cartItems.product_info.find(
+            (product) => product.id === cartItem.product
+          );
+
+          return (
+            <div key={cartItem.id} className="mb-4">
+              <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold mb-2">
+                    {product ? product.name : "Unkown Product"}
+                  </h3>
+
+                  {productImages[product.id] &&
+                  productImages[product.id].length > 0 ? (
+                    <img
+                      src={BackendServerURL + productImages[product.id][0].img}
+                      alt={product ? product.name : "Image"}
+                      style={{ width: "150px" }}
+                    />
+                  ) : (
+                    <p>No Image</p>
+                  )}
+                  <p>數量: {cartItem.quantity}</p>
+                  <button
+                    className="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600"
+                    onClick={() => handleDeal(cartItem.id)}
+                  >
+                    Checkout
+                  </button>
+                  <button
+                    className="bg-red-500 text-white px-4 py-2 rounded mt-4 hover:bg-red-600"
+                    onClick={() => handleDelete(cartItem.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })
+```
 ### Other
 - If U don't want to use TypeScript, please delete frontend_ts directory after git clone  
-- If U only want to use TypeScript, please delete frontend directory after git clone  
-__Good Luck__  
-Aaron 00:39 Oct 3. '24
+- If U only want to use TypeScript, please delete frontend directory after git clone
