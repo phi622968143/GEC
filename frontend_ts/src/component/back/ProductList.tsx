@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ProductDelete from "./ProductDelete";
 import ProductUpdate from "./ProductUpdate";
+import ProductUpload from "./ProductUpload";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
+// 定義 product、image、audio 的型別
 interface Product {
   id: number;
   name: string;
@@ -15,14 +18,14 @@ interface Product {
   description?: string;
 }
 
-interface ProductImage {
+interface Image {
   id: number;
   product: number;
   img: string;
   primary: boolean;
 }
 
-interface ProductAudio {
+interface Audio {
   id: number;
   product: number;
   equipment: string;
@@ -32,25 +35,25 @@ interface ProductAudio {
 const ProductList: React.FC = () => {
   const BackendURL = "http://127.0.0.1:8000/";
   const [productData, setProductData] = useState<Product[]>([]);
-  const [productImages, setProductImages] = useState<{
-    [key: number]: ProductImage[];
-  }>({});
-  const [productAudios, setProductAudios] = useState<{
-    [key: number]: ProductAudio[];
-  }>({});
-  const [error, setError] = useState<string | null>(null);
-  const [updateSelected, setUpdateSelected] = useState<ProductImage | null>(
-    null
+  const [productImages, setProductImages] = useState<Record<number, Image[]>>(
+    {}
   );
+  const [productAudios, setProductAudios] = useState<Record<number, Audio[]>>(
+    {}
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [updateSelected, setUpdateSelected] = useState<Image | null>(null);
   const [clicked, setClicked] = useState(false);
   const navigate = useNavigate();
 
   const pageChange = () => {
-    window.location.href = "http://localhost:3920/upload";
+    window.location.href = "http://localhost:1140/upload";
   };
 
-  const handleClick = (img: ProductImage) => {
-    setUpdateSelected(img);
+  const handleClick = (img: Image | Product) => {
+    if ("img" in img) {
+      setUpdateSelected(img);
+    }
   };
 
   const handleClose = () => {
@@ -61,18 +64,14 @@ const ProductList: React.FC = () => {
     const fetchData = async () => {
       try {
         // Fetch product data
-        const productResponse = await axios.get<Product[]>(
-          `${BackendURL}api/product`
-        );
-        const products = productResponse.data;
+        const productResponse = await axios.get(`${BackendURL}api/product`);
+        const products: Product[] = productResponse.data;
         setProductData(products);
 
         // Fetch product images
-        const imgResponse = await axios.get<ProductImage[]>(
-          `${BackendURL}api/img`
-        );
-        const images = imgResponse.data;
-        const imagesByProduct: { [key: number]: ProductImage[] } = {};
+        const imgResponse = await axios.get(`${BackendURL}api/img`);
+        const images: Image[] = imgResponse.data;
+        const imagesByProduct: Record<number, Image[]> = {};
         images.forEach((img) => {
           if (!imagesByProduct[img.product]) {
             imagesByProduct[img.product] = [];
@@ -82,11 +81,9 @@ const ProductList: React.FC = () => {
         setProductImages(imagesByProduct);
 
         // Fetch product audios
-        const audioResponse = await axios.get<ProductAudio[]>(
-          `${BackendURL}api/audio`
-        );
-        const audios = audioResponse.data;
-        const audiosByProduct: { [key: number]: ProductAudio[] } = {};
+        const audioResponse = await axios.get(`${BackendURL}api/audio`);
+        const audios: Audio[] = audioResponse.data;
+        const audiosByProduct: Record<number, Audio[]> = {};
         audios.forEach((audio) => {
           if (!audiosByProduct[audio.product]) {
             audiosByProduct[audio.product] = [];
@@ -111,27 +108,27 @@ const ProductList: React.FC = () => {
     return null;
   }
 
-  const CATEGORY_CHOICES = [
+  const CATEGORY_CHOICES: [number, string][] = [
     [1, "Electric Guitar"],
     [2, "Amplifier"],
     [3, "Effects Pedal"],
     [4, "Gig Bag"],
   ];
 
-  const skillLevels: { [key: string]: string } = {
+  const skillLevels: Record<string, string> = {
     beginner: "初學者",
     intermediate: "中級",
     advanced: "高級",
   };
 
-  const getCategoryName = (categoryValue: number) => {
+  const getCategoryName = (categoryValue: number): string => {
     const matchingChoice = CATEGORY_CHOICES.find(
       (choice) => choice[0] === categoryValue
     );
-    return matchingChoice ? matchingChoice[1] : categoryValue;
+    return matchingChoice ? matchingChoice[1] : String(categoryValue);
   };
 
-  const getSkillLevelName = (skillLevelValue: string) => {
+  const getSkillLevelName = (skillLevelValue: string): string => {
     return skillLevels[skillLevelValue] || skillLevelValue;
   };
 
@@ -140,9 +137,9 @@ const ProductList: React.FC = () => {
       <h1 className="text-2xl font-bold mb-4">產品列表</h1>
       <p className="mb-6">點擊照片可以更新, 刪除是將整個產品刪除ㄛ！</p>
 
-      <table className="table-auto w-full text-left border-collapse">
+      <table className="table-auto w-full hover:shadow-lg rounded-lg text-left border-collapse">
         <thead>
-          <tr className="bg-gray-200">
+          <tr className="bg-purple-400">
             <th className="p-3 border">名稱</th>
             <th className="p-3 border">價格</th>
             <th className="p-3 border">品牌</th>
@@ -157,7 +154,7 @@ const ProductList: React.FC = () => {
         </thead>
         <tbody>
           {productData.map((product) => (
-            <tr key={product.id} className="hover:bg-gray-100">
+            <tr key={product.id} className="bg-purple-100 hover:bg-purple-200">
               <td className="p-3 border">{product.name}</td>
               <td className="p-3 border">{product.price}</td>
               <td className="p-3 border">{product.brand}</td>
@@ -205,11 +202,7 @@ const ProductList: React.FC = () => {
                     <button
                       onClick={() => {
                         setClicked(!clicked);
-                        handleClick(
-                          productImages[product.id]
-                            ? productImages[product.id][0]
-                            : img
-                        );
+                        handleClick(product);
                       }}
                       className="text-blue-500 underline"
                     >

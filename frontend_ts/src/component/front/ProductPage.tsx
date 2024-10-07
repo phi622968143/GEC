@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-// Category choices type definition
-interface Category {
+// 定義 Category 的型別
+type Category = {
   id: number;
   name: string;
-}
+};
 
-interface Product {
+type Product = {
   id: number;
   name: string;
   price: number;
   description: string;
-  img: Array<{ img: string }>; // Assuming 'img' is an array of objects with 'img' as a key
-}
+  img: { img: string }[]; // 假設 img 是一個陣列，且每個元素是一個帶有 img 屬性的物件
+};
 
 const CATEGORY_CHOICES: Category[] = [
   { id: 1, name: "Electric Guitar" },
@@ -27,6 +29,7 @@ const BackendURL = "http://127.0.0.1:8000/api/";
 const MediaURL = "http://127.0.0.1:8000/";
 
 const ProductPage: React.FC = () => {
+  // 為 productData 使用適當的型別定義，預設為空陣列
   const [productData, setProductData] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number>(1);
   const navigate = useNavigate();
@@ -34,13 +37,13 @@ const ProductPage: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get(
+        const res = await axios.get<Product[]>(
           `${BackendURL}product_page/${selectedCategory}`
         );
-        const products: Product[] = res.data;
+        const products = res.data;
         setProductData(products);
       } catch (err) {
-        console.error(err);
+        console.log(err);
       }
     };
 
@@ -53,23 +56,51 @@ const ProductPage: React.FC = () => {
 
   const handleAddCartClick = async (product_id: number) => {
     try {
-      const res = await axios.post(`${BackendURL}cart/add`, {
-        customer: 1, // Assuming customer ID is hardcoded to 1 for now
+      const response = await axios.post(`${BackendURL}cart/add`, {
+        customer: 1, // 如果需要，可以替換1為動態的顧客ID
         product: product_id,
       });
-      console.log(res);
-      navigate("/cart/1");
+      console.log("加入購物車API返回數據: ", response.data);
+      toast.success("商品成功加入購物車!", {
+        position: "top-right",
+        autoClose: 1500, // 1.5秒後自動關閉
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        onClose: () => navigate("/cart/1"), // 加入購物車後跳轉
+      });
     } catch (error) {
-      console.error(error);
+      console.error("加入購物車API出錯: ", error);
+      toast.error("商品加入購物車失敗!", {
+        position: "top-right",
+        autoClose: 1500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      console.log(
+        error instanceof Error && error.response
+          ? error.response.data
+          : error.message
+      );
     }
+  };
+
+  const handleToCartClick = () => {
+    window.location.href = "/cart/1";
   };
 
   return (
     <div className="container mx-auto mt-4">
-      <h1 className="mb-4 text-2xl font-bold">GEC</h1>
-
-      {/* Category buttons */}
-      <div className="mb-4">
+      <ToastContainer />
+      <h1 className="mb-4">GEC</h1>
+      <button onClick={handleToCartClick}>Cart</button>
+      <div className="category-buttons mb-4">
         {CATEGORY_CHOICES.map((category) => (
           <button
             key={category.id}
@@ -85,7 +116,6 @@ const ProductPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Products */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {productData.map((product) => (
           <div key={product.id} className="mb-4">

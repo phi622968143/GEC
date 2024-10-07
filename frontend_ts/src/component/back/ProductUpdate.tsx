@@ -1,11 +1,13 @@
-import React from "react";
 import axios from "axios";
+import React, { FormEvent } from "react";
+
+interface ProductImg {
+  id: number;
+  num?: number;
+}
 
 interface ProductUpdateProps {
-  productImg: {
-    id: number;
-    num?: number;
-  };
+  productImg: ProductImg;
   onClose: () => void;
 }
 
@@ -17,11 +19,10 @@ const ProductUpdate: React.FC<ProductUpdateProps> = ({
   const ImgURL = "http://127.0.0.1:8000/api/img/patch/";
   const AudioURL = "http://127.0.0.1:8000/api/audio/patch/";
 
-  const handleClose = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleClose = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const ImgUpdateData = new FormData(e.currentTarget);
-
       if (!productImg.num) {
         const ImgPath = ImgURL + productImg.id;
         await axios.patch(ImgPath, ImgUpdateData, {
@@ -30,11 +31,11 @@ const ProductUpdate: React.FC<ProductUpdateProps> = ({
           },
         });
         onClose();
-        alert("Update complete");
+        alert("Update Complete");
       } else {
         const imageData = new FormData();
         imageData.append("product", productImg.id.toString()); // Include the product ID
-        imageData.append("img", ImgUpdateData.get("img") as File);
+        imageData.append("img", ImgUpdateData.get("img") as Blob);
         imageData.append(
           "primary",
           ImgUpdateData.get("primary") ? "true" : "false"
@@ -46,7 +47,6 @@ const ProductUpdate: React.FC<ProductUpdateProps> = ({
               "Content-Type": "multipart/form-data",
             },
           });
-          alert("Image upload complete");
         } catch (e) {
           console.log(e);
         }
@@ -57,21 +57,41 @@ const ProductUpdate: React.FC<ProductUpdateProps> = ({
   };
 
   return (
-    <div>
-      <p>Product Image Update</p>
-      <form onSubmit={handleClose}>
-        <label htmlFor="img">Image (File):</label>
-        <input type="file" id="img" name="img" required />
-        <br />
+    <div className="p-14 bg-zinc-200">
+      <div>
+        <form onSubmit={handleClose} className="border-solid p-3">
+          <div className="bg-white shadow-zinc-300 shadow-lg p-5 m-1 rounded border border-zinc-700">
+            <h1 className=" text-2xl ">Product Image Update</h1>
+          </div>
+          <div className="bg-white shadow-zinc-300 shadow-lg p-5 m-1 rounded border border-zinc-700">
+            <label htmlFor="img">Image (File):</label>
+            <input
+              type="file"
+              id="img"
+              name="img"
+              className="hover:file:cursor-pointer block w-1/2 text-sm file:bg-green-500 file:text-white file:px-4 file:py-2 file:rounded file:mt-4 hover:file:bg-green-600"
+              required
+            />
+          </div>
+          <br />
 
-        <label htmlFor="primary">Primary Image:</label>
-        <input type="checkbox" id="primary" name="primary" />
-        <br />
-        <button type="submit">Update Image</button>
-        <button type="button" onClick={onClose}>
-          Cancel
-        </button>
-      </form>
+          <label htmlFor="primary">Primary Image:</label>
+          <input type="checkbox" id="primary" name="primary" />
+          <br />
+          <button
+            type="submit"
+            className="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600"
+          >
+            Update Image
+          </button>
+          <button
+            onClick={onClose}
+            className="bg-red-500 text-white px-4 py-2 rounded mt-4 hover:bg-red-600"
+          >
+            Cancel
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

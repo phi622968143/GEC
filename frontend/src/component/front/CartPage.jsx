@@ -83,13 +83,11 @@ const CartPage = () => {
       <div>CartPage</div>
 
       {loading ? (
-        <p>加載中...</p>
+        <p>Loading...</p>
       ) : cartItems.cart_items.length > 0 ? (
-        // 對 cartItems.cart_items 進行 map，而不是 cartItems
         cartItems.cart_items.map((cartItem) => {
-          // 使用 cartItem.id 找到對應的 product_info
           const product = cartItems.product_info.find(
-            (product) => product.id === cartItem.product // 假設 cartItem.id 對應 product_info.id
+            (product) => product.id === cartItem.product
           );
 
           return (
@@ -97,14 +95,14 @@ const CartPage = () => {
               <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                 <div className="p-4">
                   <h3 className="text-lg font-semibold mb-2">
-                    {product ? product.name : "未知產品"}
+                    {product ? product.name : "Unkown Product"}
                   </h3>
 
                   {productImages[product.id] &&
                   productImages[product.id].length > 0 ? (
                     <img
                       src={BackendServerURL + productImages[product.id][0].img}
-                      alt={product ? product.name : "產品圖片"}
+                      alt={product ? product.name : "Image"}
                       style={{ width: "150px" }}
                     />
                   ) : (

@@ -1,4 +1,3 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 const ProductDelete = ({ productId, onDelete }) => {
   const BackURL = "http://127.0.0.1:8000/api/product/delete/";

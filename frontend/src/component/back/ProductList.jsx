@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css";
 import ProductDelete from "./ProductDelete";
 import ProductUpdate from "./ProductUpdate";
 import ProductUpload from "./ProductUpload";

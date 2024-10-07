@@ -1,8 +1,9 @@
 import axios from "axios";
 
+// 定義 props 的型別
 interface ProductDeleteProps {
-  productId: number; // Assuming productId is a number
-  onDelete: (id: number) => void; // Callback function to handle deletion
+  productId: number;
+  onDelete: (id: number) => void;
 }
 
 const ProductDelete: React.FC<ProductDeleteProps> = ({
@@ -14,8 +15,8 @@ const ProductDelete: React.FC<ProductDeleteProps> = ({
   const handleDelete = async () => {
     if (window.confirm("還是刪了吧")) {
       try {
-        await axios.delete(`${BackURL}${productId}`);
-        onDelete(productId); // Clear frontend (no render)
+        await axios.delete(BackURL + productId);
+        onDelete(productId); // 通知父層組件清除前端顯示
       } catch (error) {
         console.log(error);
       }
