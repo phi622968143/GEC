@@ -1,24 +1,20 @@
 import React, { useState, useEffect } from "react";
+import SearchPage from "../back/SearchPage";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// 定義 Category 的型別
-type Category = {
-  id: number;
-  name: string;
-};
-
-type Product = {
+// 定義產品和圖片的類型
+interface Product {
   id: number;
   name: string;
   price: number;
   description: string;
-  img: { img: string }[]; // 假設 img 是一個陣列，且每個元素是一個帶有 img 屬性的物件
-};
+  img: { img: string }[]; // 假設每個產品有多個圖片
+}
 
-const CATEGORY_CHOICES: Category[] = [
+const CATEGORY_CHOICES = [
   { id: 1, name: "Electric Guitar" },
   { id: 2, name: "Amplifier" },
   { id: 3, name: "Effects Pedal" },
@@ -29,19 +25,20 @@ const BackendURL = "http://127.0.0.1:8000/api/";
 const MediaURL = "http://127.0.0.1:8000/";
 
 const ProductPage: React.FC = () => {
-  // 為 productData 使用適當的型別定義，預設為空陣列
   const [productData, setProductData] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number>(1);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get<Product[]>(
+        const res = await axios.get(
           `${BackendURL}product_page/${selectedCategory}`
         );
-        const products = res.data;
+        const products: Product[] = res.data;
         setProductData(products);
+        setFilteredProducts(products);
       } catch (err) {
         console.log(err);
       }
@@ -54,16 +51,16 @@ const ProductPage: React.FC = () => {
     setSelectedCategory(categoryId);
   };
 
-  const handleAddCartClick = async (product_id: number) => {
+  const handleAddCartClick = async (productId: number) => {
     try {
       const response = await axios.post(`${BackendURL}cart/add`, {
         customer: 1, // 如果需要，可以替換1為動態的顧客ID
-        product: product_id,
+        product: productId,
       });
       console.log("加入購物車API返回數據: ", response.data);
       toast.success("商品成功加入購物車!", {
         position: "top-right",
-        autoClose: 1500, // 1.5秒後自動關閉
+        autoClose: 1500,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -83,11 +80,7 @@ const ProductPage: React.FC = () => {
         progress: undefined,
       });
 
-      console.log(
-        error instanceof Error && error.response
-          ? error.response.data
-          : error.message
-      );
+      console.log(error.response ? error.response.data : error.message);
     }
   };
 
@@ -95,11 +88,44 @@ const ProductPage: React.FC = () => {
     window.location.href = "/cart/1";
   };
 
+  const handleSearch = (searchTerm: string) => {
+    if (searchTerm) {
+      const filtered = productData.filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.brand.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    } else {
+      setFilteredProducts(productData);
+    }
+  };
+
   return (
     <div className="container mx-auto mt-4">
       <ToastContainer />
       <h1 className="mb-4">GEC</h1>
-      <button onClick={handleToCartClick}>Cart</button>
+      <SearchPage onSearch={handleSearch} />
+      <button
+        onClick={handleToCartClick}
+        className="ml-2 bg-green-500 text-white p-2 rounded hover:bg-green-600 flex flex-row"
+      >
+        <span>Cart</span>
+        <svg
+          className="w-6 h-6"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke="currentColor"
+            d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312"
+          />
+        </svg>
+      </button>
       <div className="category-buttons mb-4">
         {CATEGORY_CHOICES.map((category) => (
           <button
@@ -116,38 +142,42 @@ const ProductPage: React.FC = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {productData.map((product) => (
-          <div key={product.id} className="mb-4">
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-              <div className="p-4">
-                <h5 className="text-lg font-semibold mb-2">{product.name}</h5>
-                <img
-                  src={MediaURL + product.img[0].img}
-                  alt={product.name}
-                  className="w-24 h-auto max-w-xs max-h-xs object-cover"
-                />
-                <br />
-                <a
-                  href={BackendURL + product.description}
-                  className="text-blue-500 underline"
-                >
-                  產品描述
-                </a>
-                <p className="mt-2 text-lg font-bold">
-                  Price: ${product.price}
-                </p>
-                <button
-                  className="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600"
-                  onClick={() => handleAddCartClick(product.id)}
-                >
-                  Add Cart
-                </button>
+      {filteredProducts.length === 0 ? (
+        <div>No result</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {filteredProducts.map((product) => (
+            <div key={product.id} className="mb-4">
+              <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div className="p-4">
+                  <h5 className="text-lg font-semibold mb-2">{product.name}</h5>
+                  <img
+                    src={MediaURL + product.img[0].img}
+                    alt={product.name}
+                    className="w-24 h-auto max-w-xs max-h-xs object-cover"
+                  />
+                  <br />
+                  <a
+                    href={BackendURL + product.description}
+                    className="text-blue-500 underline"
+                  >
+                    產品描述
+                  </a>
+                  <p className="mt-2 text-lg font-bold">
+                    Price: ${product.price}
+                  </p>
+                  <button
+                    className="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600"
+                    onClick={() => handleAddCartClick(product.id)}
+                  >
+                    Add Cart
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
