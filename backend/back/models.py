@@ -70,17 +70,23 @@ class ProductAudio(models.Model):
     product = models.ForeignKey(Product, related_name='audio_samples', on_delete=models.CASCADE)
     equipment=models.CharField(max_length=100, blank=True, null=True)## related eq
     audio=models.FileField(upload_to='media/product_audio/',blank=True, null=True)
+
 class Order(models.Model):
-    customer_email=models.ForeignKey(Customer, related_name="order", on_delete=models.CASCADE)
+    customer_email=models.ForeignKey(Customer, related_name="ordered_customer", on_delete=models.CASCADE)
     pay_method=models.CharField(max_length=20)
     order_date=models.DateTimeField(auto_now_add=True)
-    send_day=models.DateField()
+    send_time = models.DateTimeField(null=True, blank=True) 
     is_send=models.BooleanField(default=False)
+    is_paid=models.BooleanField(default=False)  
+    city = models.CharField(max_length=20, null=True, blank=True)
+  
 class OrderDetail(models.Model):
+    order=models.ForeignKey(Order, related_name="order", on_delete=models.CASCADE)
     product=models.ForeignKey(Product, related_name="detail", on_delete=models.CASCADE)
-    product_num=models.SmallIntegerField(validators=[
+    product_num=models.SmallIntegerField(
+    validators=[
             MaxValueValidator(10),
             MinValueValidator(1)
-        ])
-    city=models.CharField(max_length=20)     
+    ])
+     
 

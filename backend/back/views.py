@@ -39,6 +39,7 @@ def GetAudio(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['GET'])
 def GetOrder(request):
     try:
@@ -47,6 +48,7 @@ def GetOrder(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 @api_view(['POST'])
 def PostProduct(req):
         serializer = ProductSerializer(data=req.data)
@@ -93,13 +95,21 @@ def PostAudio(req):
     return Response(status=status.HTTP_201_CREATED)
 @api_view(['POST'])
 def PostOrder(req):
-    serializer = OrderSerializer(data=req.data)
-    
-    if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    order=req.data.copy()
+    order_detail=order.pop("order_details") #get detail
+    order_serializer = OrderSerializer(data=order)
+    if order_serializer.is_valid():
+        order = order_serializer.save()
+        order_detail['order']=order.id       #relation #single obj
+        detail_serializer = OrderDetailSerializer(data=order_detail)
+        
+        if detail_serializer.is_valid():
+            detail_serializer.save()
+            return Response(status=status.HTTP_201_CREATED)
+        else:
+            raise serializers.ValidationError(detail_serializer.errors)
     else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+        raise serializers.ValidationError(detail_serializer.errors) 
 
 @api_view(['PATCH'])
 def PatchPic(req,id):
