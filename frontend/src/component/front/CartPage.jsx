@@ -5,18 +5,7 @@ const BackendAPIURL = "http://127.0.0.1:8000/api/";
 const BackendServerURL="http://127.0.0.1:8000/"
 
 const CartPage = () => {
-    const [cartItems, setCartItems] = useState(
-        {
-            cart_items: [
-              { id: 4, quantity: 0, date_added: '', customer: 0, product: 0 },
-              
-            ],
-            product_info: [
-              { id: 22, name: '', price: 0, brand: '', num: 0 },
-            ],
-            total_price: 0
-          }
-);
+    const [cartItems, setCartItems] = useState([]);
     const [orderSubmitted, setOrderSubmitted] = useState(false);
     const [productImages,setProductImages]=useState({});
     const [loading, setLoading] = useState(true);
@@ -57,18 +46,46 @@ const CartPage = () => {
         fetchCartItems();
     }, []);
     
-    const handleDeal = async (product_id) => {
-        try {
-            const response = await axios.post(`${BackendAPIURL}order/post`, {
-                "customer_email": 1,  
-                "pay_method": "信用卡", 
-                "send_day": "2024-09-25",  
-            });
+    const handleDeal = async (cartItem) => {
+    //chose pay_method
+    const pay_method = prompt(
+        "請選擇付款方式:\n1: 信用卡\n2: 銀行轉帳\n3: LINE Pay\n請輸入數字(1-3)"
+    );
+    
+    // chack if cancel
+    if (!pay_method) {
+        alert("請選擇付款方式!");
+        return;
+    }
 
+    // check if avaliable
+    if (!["1", "2", "3"].includes(pay_method)) {
+        alert("請輸入有效的數字 1-3!");
+        return;
+    }
+    
+    // transform num to methods
+    const paymentMethods = {
+        "1": "信用卡",
+        "2": "銀行轉帳",
+        "3": "LINE Pay"
+    };  
+    try {
+
+            const response = await axios.post(`${BackendAPIURL}order/post`,  {           
+              "customer_email": 1,
+              "pay_method": paymentMethods[pay_method],
+              "order_details": 
+                  {   
+                      "product": cartItem.product,
+                      "product_num": cartItem.quantity
+                  }
+      
+            });
+            await axios.delete(`${BackendAPIURL}cart/delete/${cartItem.id}`);
             if (response) {
-                
                 setOrderSubmitted(true);
-                console.log(orderSubmitted)
+                alert("order sent");
             } else {
                 console.error('Failed to submit order');
             }
@@ -76,6 +93,7 @@ const CartPage = () => {
             console.error('Error:', error);
         }
     };
+    
     const handleDelete = async (item_id) => {
         if (window.confirm('del it...')) {
             try {
@@ -88,42 +106,63 @@ const CartPage = () => {
     
     return (
         <div>
-        <h1>Cart for User {usr_id}</h1>
-        <div>CartPage</div>
-   
-        {loading ? (
+          <h1>Cart for User {usr_id}</h1>
+          <div>CartPage</div>
+    
+          {loading ? (
             <p>Loading...</p>
-        ) :cartItems.length > 0 ? (
-                cartItems.map((item) => (
-                    <div key={item.product_info.id} className="cart-item">
-                        <h3>{item.product_info.name}</h3>
-                        
+           ) : cartItems.cart_items.length > 0 ? (
+              // using cart_items  product maps product id to use product info
+              
+              cartItems.cart_items.map((cartItem) => {
+              const product = cartItems.product_info.find(
+                (product) => product.id === cartItem.product
+              );
+    
+              return (
+                <div key={cartItem.id} className="mb-4">
+                  <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <div className="p-4">
+                      <h3 className="text-lg font-semibold mb-2">
+                        {product ? product.name : "Unkown Product"}
+                      </h3>
+    
+                      {productImages[product.id] &&
+                      productImages[product.id].length > 0 ? (
+                        <img
+                          src={BackendServerURL + productImages[product.id][0].img}
+                          alt={product ? product.name : "Image"}
+                          style={{ width: "150px" }}
+                        />
+                      ) : (
+                        <p>No Image</p>
+                      )}
+                      <p>數量: {cartItem.quantity}</p>
+                      
+                      <button
+                        className="bg-green-500 text-blue px-4 py-2 rounded mt-4 hover:bg-green-600"
+                        onClick={() => handleDeal(cartItem)}
+                      >
+                        Checkout
+                      </button>
 
-                        {productImages[item.product_info.id] && productImages[item.product_info.id].length > 0 ? (
-                            <img 
-                                src={BackendServerURL+productImages[item.product_info.id][0].img} 
-                                alt={item.product_info.name} 
-                                style={{ width: '150px' }} 
-                            />
-                        ) : (
-                            <p>No images available</p>
-                        )}
-                        <p>Quantity: {item.product_info.num}</p>
-
-                        <button onClick={() => handleDeal(item.cart_items.id)}>
-                            Checkout
-                        </button>
-                        <button onClick={() => handleDelete(item.cart_items.id)}>
-                            Delete
-                        </button>
+                      <button
+                        className="bg-red-500 text-blue px-4 py-2 rounded mt-4 hover:bg-red-600"
+                        onClick={() => handleDelete(cartItem.id)}
+                      >
+                        Delete
+                      </button>
                     </div>
-                ))
-            ) : (
-                <p>No items in the cart.</p>
-            )} <h3>{cartItems.total_price}</h3>
-        
-    </div>
-    )
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <p>No items in the cart.</p>
+          )}
+          <h3>Total price is ${cartItems.total_price}</h3>
+        </div>
+    );
        
 };
 

@@ -57,3 +57,16 @@ Sep 23={
 Oct 4={
    useEffect & CartPage info & delete
 }
+
+Oct 9={
+   merge cartpage,add relation to order & order details
+
+}
+OCT 11 ={ respberry pi and remote }
+
+OCT 22={postorder success!,find in api/order/post,}
+OCT 26={
+   check out and delete in cart v ,
+   see handledeal I used prompt to let using key in number 
+   and then pass the paymethod , you can beauty the UI of the alert box
+}
