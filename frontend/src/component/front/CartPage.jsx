@@ -5,7 +5,7 @@ const BackendAPIURL = "http://127.0.0.1:8000/api/";
 const BackendServerURL = "http://127.0.0.1:8000/";
 
 const CartPage = () => {
-  const [cartItems, setCartItems] = useState({});
+  const [cartItems, setCartItems] = useState([]);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [productImages, setProductImages] = useState({});
   const [loading, setLoading] = useState(true);
@@ -21,9 +21,8 @@ const CartPage = () => {
           const res = await axios.get(`${BackendAPIURL}cart/view/${usr_id}`);
 
           //   console.log(res.data);
-          setLoading(false);
           setCartItems(res.data);
-
+          setLoading(false);
           res.data.product_info.forEach((product) => {
             fetchProductImgs(product.id);
           });
@@ -49,17 +48,43 @@ const CartPage = () => {
     fetchCartItems();
   }, []);
 
-  const handleDeal = async (product_id) => {
+  const handleDeal = async (cartItem) => {
+    //chose pay_method
+    const pay_method = prompt(
+      "請選擇付款方式:\n1: 信用卡\n2: 銀行轉帳\n3: LINE Pay\n請輸入數字(1-3)"
+    );
+
+    // chack if cancel
+    if (!pay_method) {
+      alert("請選擇付款方式!");
+      return;
+    }
+
+    // check if avaliable
+    if (!["1", "2", "3"].includes(pay_method)) {
+      alert("請輸入有效的數字 1-3!");
+      return;
+    }
+
+    // transform num to methods
+    const paymentMethods = {
+      1: "信用卡",
+      2: "銀行轉帳",
+      3: "LINE Pay",
+    };
     try {
       const response = await axios.post(`${BackendAPIURL}order/post`, {
         customer_email: 1,
-        pay_method: "信用卡",
-        send_day: "2024-09-25",
+        pay_method: paymentMethods[pay_method],
+        order_details: {
+          product: cartItem.product,
+          product_num: cartItem.quantity,
+        },
       });
-
+      await axios.delete(`${BackendAPIURL}cart/delete/${cartItem.id}`);
       if (response) {
         setOrderSubmitted(true);
-        console.log(orderSubmitted);
+        alert("order sent");
       } else {
         console.error("Failed to submit order");
       }
@@ -67,6 +92,7 @@ const CartPage = () => {
       console.error("Error:", error);
     }
   };
+
   const handleDelete = async (item_id) => {
     if (window.confirm("del it...")) {
       try {
@@ -76,7 +102,7 @@ const CartPage = () => {
       }
     }
   };
-  console.log(cartItems);
+
   return (
     <div>
       <h1>Cart for User {usr_id}</h1>
@@ -85,6 +111,8 @@ const CartPage = () => {
       {loading ? (
         <p>Loading...</p>
       ) : cartItems.cart_items.length > 0 ? (
+        // using cart_items  product maps product id to use product info
+
         cartItems.cart_items.map((cartItem) => {
           const product = cartItems.product_info.find(
             (product) => product.id === cartItem.product
@@ -109,14 +137,16 @@ const CartPage = () => {
                     <p>No Image</p>
                   )}
                   <p>數量: {cartItem.quantity}</p>
+
                   <button
-                    className="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600"
-                    onClick={() => handleDeal(cartItem.id)}
+                    className="bg-green-500 text-blue px-4 py-2 rounded mt-4 hover:bg-green-600"
+                    onClick={() => handleDeal(cartItem)}
                   >
                     Checkout
                   </button>
+
                   <button
-                    className="bg-red-500 text-white px-4 py-2 rounded mt-4 hover:bg-red-600"
+                    className="bg-red-500 text-blue px-4 py-2 rounded mt-4 hover:bg-red-600"
                     onClick={() => handleDelete(cartItem.id)}
                   >
                     Delete
