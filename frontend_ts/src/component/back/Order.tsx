@@ -1,18 +1,28 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+
 const BackendAPIURL = "http://127.0.0.1:8000/api/";
 
-const Order = () => {
-  const [orders, setOrders] = useState([]);
+interface Order {
+  id: number;
+  customer_email: string;
+  pay_method: string;
+  order_date: string;
+  city?: string;
+  is_paid: boolean;
+  is_send: boolean;
+}
+
+const OrderPage: React.FC = () => {
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   // 取得所有訂單資料
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get(`${BackendAPIURL}order/get`);
+        const response = await axios.get<Order[]>(`${BackendAPIURL}order/get`);
         setOrders(response.data);
-        console.log(response);
         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch orders:", error);
@@ -24,7 +34,7 @@ const Order = () => {
   }, []);
 
   // 刪除指定訂單
-  const handleDeleteOrder = async (orderId) => {
+  const handleDeleteOrder = async (orderId: number) => {
     if (window.confirm("Are you sure you want to delete this order?")) {
       try {
         await axios.delete(`${BackendAPIURL}order/delete/${orderId}`);
@@ -100,4 +110,4 @@ const Order = () => {
   );
 };
 
-export default Order;
+export default OrderPage;

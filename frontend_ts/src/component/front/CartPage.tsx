@@ -5,57 +5,42 @@ import { useParams } from "react-router-dom";
 const BackendAPIURL = "http://127.0.0.1:8000/api/";
 const BackendServerURL = "http://127.0.0.1:8000/";
 
-// 定義 CartItem 和 Product 的型別
-type CartItem = {
+interface CartItem {
   id: number;
-  product: number; // product 是一個 product 的 id
+  product: number;
   quantity: number;
-};
+}
 
-type Product = {
+interface ProductInfo {
   id: number;
   name: string;
-};
+}
 
-type CartResponse = {
+interface CartData {
   cart_items: CartItem[];
-  product_info: Product[];
+  product_info: ProductInfo[];
   total_price: number;
-};
+}
 
-type ImageResponse = {
-  img: string;
-};
+interface ProductImages {
+  [key: number]: { img: string }[];
+}
 
 const CartPage: React.FC = () => {
-  // 預設為空物件，並指定型別
-  const [cartItems, setCartItems] = useState<CartResponse>({
-    cart_items: [],
-    product_info: [],
-    total_price: 0,
-  });
+  const [cartItems, setCartItems] = useState<CartData | null>(null);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
-  const [productImages, setProductImages] = useState<
-    Record<number, ImageResponse[]>
-  >({});
+  const [productImages, setProductImages] = useState<ProductImages>({});
   const [loading, setLoading] = useState(true);
   const { usr_id } = useParams<{ usr_id: string }>();
 
-  //fetch and set data by usr_id
-  //fetch pic using CartItem id
   useEffect(() => {
     const fetchCartItems = async () => {
       if (usr_id) {
         try {
-          const res = await axios.get<CartResponse>(
-            `${BackendAPIURL}cart/view/${usr_id}`
-          );
-
-          setLoading(false);
+          const res = await axios.get(`${BackendAPIURL}cart/view/${usr_id}`);
           setCartItems(res.data);
-
-          // 迭代產品圖片
-          res.data.product_info.forEach((product) => {
+          setLoading(false);
+          res.data.product_info.forEach((product: ProductInfo) => {
             fetchProductImgs(product.id);
           });
         } catch (error) {
@@ -66,7 +51,7 @@ const CartPage: React.FC = () => {
 
     const fetchProductImgs = async (product_id: number) => {
       try {
-        const res = await axios.get<ImageResponse[]>(
+        const res = await axios.get(
           `${BackendAPIURL}img?product_id=${product_id}`
         );
         setProductImages((prevState) => ({
@@ -81,17 +66,38 @@ const CartPage: React.FC = () => {
     fetchCartItems();
   }, [usr_id]);
 
-  const handleDeal = async (product_id: number) => {
+  const handleDeal = async (cartItem: CartItem) => {
+    const pay_method = prompt(
+      "請選擇付款方式:\n1: 信用卡\n2: 銀行轉帳\n3: LINE Pay\n請輸入數字(1-3)"
+    );
+    if (!pay_method) {
+      alert("請選擇付款方式!");
+      return;
+    }
+    if (!["1", "2", "3"].includes(pay_method)) {
+      alert("請輸入有效的數字 1-3!");
+      return;
+    }
+
+    const paymentMethods = {
+      1: "信用卡",
+      2: "銀行轉帳",
+      3: "LINE Pay",
+    };
+
     try {
       const response = await axios.post(`${BackendAPIURL}order/post`, {
-        customer_email: 1, // 假設為靜態客戶ID或郵箱
-        pay_method: "信用卡",
-        send_day: "2024-09-25",
+        customer_email: 1,
+        pay_method: paymentMethods[pay_method as keyof typeof paymentMethods],
+        order_details: {
+          product: cartItem.product,
+          product_num: cartItem.quantity,
+        },
       });
-
+      await axios.delete(`${BackendAPIURL}cart/delete/${cartItem.id}`);
       if (response) {
         setOrderSubmitted(true);
-        console.log(orderSubmitted);
+        alert("order sent");
       } else {
         console.error("Failed to submit order");
       }
@@ -117,7 +123,7 @@ const CartPage: React.FC = () => {
 
       {loading ? (
         <p>Loading...</p>
-      ) : cartItems.cart_items.length > 0 ? (
+      ) : cartItems && cartItems.cart_items.length > 0 ? (
         cartItems.cart_items.map((cartItem) => {
           const product = cartItems.product_info.find(
             (product) => product.id === cartItem.product
@@ -136,21 +142,23 @@ const CartPage: React.FC = () => {
                   productImages[product.id].length > 0 ? (
                     <img
                       src={BackendServerURL + productImages[product.id][0].img}
-                      alt={product ? product.name : "Image"}
+                      alt={product.name}
                       style={{ width: "150px" }}
                     />
                   ) : (
                     <p>No Image</p>
                   )}
                   <p>數量: {cartItem.quantity}</p>
+
                   <button
-                    className="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600"
-                    onClick={() => handleDeal(cartItem.id)}
+                    className="bg-green-500 text-blue px-4 py-2 rounded mt-4 hover:bg-green-600"
+                    onClick={() => handleDeal(cartItem)}
                   >
                     Checkout
                   </button>
+
                   <button
-                    className="bg-red-500 text-white px-4 py-2 rounded mt-4 hover:bg-red-600"
+                    className="bg-red-500 text-blue px-4 py-2 rounded mt-4 hover:bg-red-600"
                     onClick={() => handleDelete(cartItem.id)}
                   >
                     Delete
@@ -163,7 +171,7 @@ const CartPage: React.FC = () => {
       ) : (
         <p>No items in the cart.</p>
       )}
-      <h3>Total price is ${cartItems.total_price}</h3>
+      <h3>Total price is ${cartItems?.total_price}</h3>
     </div>
   );
 };
