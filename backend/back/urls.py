@@ -20,7 +20,7 @@ urlpatterns = [
    
     path('api/order/post', views.PostOrder, name='PostOrder'),
     path('api/order/get', views.GetOrder, name='GetOrder'),
-    path('api/orderdetail/get', views.GetOrderDetail, name='GetOrderDetail'),
+    path('api/orderdetail/<int:id>', views.GetOrderDetail, name='GetOrderDetail'),
     
     path('api/product_page/<int:category>',views.product_page,name="product_page"),
     path('api/cart/add',views.add_to_cart,name="add_to_cart"),
