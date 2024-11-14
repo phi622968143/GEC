@@ -7,6 +7,7 @@ import ProductList from './component/back/ProductList';
 import ProductUpdate from './component/back/ProductUpdate';
 import ProductPage from './component/front/ProductPage';
 import CartPage from './component/front/CartPage';
+import Order from './component/back/Order';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -19,7 +20,7 @@ root.render(
           <Route path='update' element={<ProductUpdate/>}></Route>
           <Route path='product' element={<ProductPage/>}></Route>
           <Route path='cart/:usr_id' element={<CartPage/>}></Route>
-
+          <Route path="order" element={<Order />}></Route>
       </Routes>
   </BrowserRouter>
 );
