@@ -48,7 +48,15 @@ def GetOrder(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+@api_view(['GET'])
+def GetOrderDetail(request,id):
+    try:
+        orders = OrderDetail.objects.get(order=id)
+        serializer = OrderDetailSerializer(orders)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['POST'])
 def PostProduct(req):
         serializer = ProductSerializer(data=req.data)

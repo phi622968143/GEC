@@ -5,32 +5,39 @@ import { useParams } from "react-router-dom";
 const BackendAPIURL = "http://127.0.0.1:8000/api/";
 const BackendServerURL = "http://127.0.0.1:8000/";
 
+// Types
+interface Product {
+  id: number;
+  name: string;
+}
+
 interface CartItem {
   id: number;
   product: number;
   quantity: number;
 }
 
-interface ProductInfo {
-  id: number;
-  name: string;
-}
-
 interface CartData {
   cart_items: CartItem[];
-  product_info: ProductInfo[];
+  product_info: Product[];
   total_price: number;
 }
 
-interface ProductImages {
-  [key: number]: { img: string }[];
+interface ProductImage {
+  img: string;
 }
 
-const CartPage: React.FC = () => {
-  const [cartItems, setCartItems] = useState<CartData | null>(null);
-  const [orderSubmitted, setOrderSubmitted] = useState(false);
-  const [productImages, setProductImages] = useState<ProductImages>({});
-  const [loading, setLoading] = useState(true);
+const CartPage = () => {
+  const [cartItems, setCartItems] = useState<CartData>({
+    cart_items: [],
+    product_info: [],
+    total_price: 0,
+  });
+  const [orderSubmitted, setOrderSubmitted] = useState<boolean>(false);
+  const [productImages, setProductImages] = useState<{
+    [key: number]: ProductImage[];
+  }>({});
+  const [loading, setLoading] = useState<boolean>(true);
   const { usr_id } = useParams<{ usr_id: string }>();
 
   useEffect(() => {
@@ -40,7 +47,7 @@ const CartPage: React.FC = () => {
           const res = await axios.get(`${BackendAPIURL}cart/view/${usr_id}`);
           setCartItems(res.data);
           setLoading(false);
-          res.data.product_info.forEach((product: ProductInfo) => {
+          res.data.product_info.forEach((product: Product) => {
             fetchProductImgs(product.id);
           });
         } catch (error) {
@@ -70,16 +77,18 @@ const CartPage: React.FC = () => {
     const pay_method = prompt(
       "請選擇付款方式:\n1: 信用卡\n2: 銀行轉帳\n3: LINE Pay\n請輸入數字(1-3)"
     );
+
     if (!pay_method) {
       alert("請選擇付款方式!");
       return;
     }
+
     if (!["1", "2", "3"].includes(pay_method)) {
       alert("請輸入有效的數字 1-3!");
       return;
     }
 
-    const paymentMethods = {
+    const paymentMethods: { [key: string]: string } = {
       1: "信用卡",
       2: "銀行轉帳",
       3: "LINE Pay",
@@ -88,12 +97,13 @@ const CartPage: React.FC = () => {
     try {
       const response = await axios.post(`${BackendAPIURL}order/post`, {
         customer_email: 1,
-        pay_method: paymentMethods[pay_method as keyof typeof paymentMethods],
+        pay_method: paymentMethods[pay_method],
         order_details: {
           product: cartItem.product,
           product_num: cartItem.quantity,
         },
       });
+
       await axios.delete(`${BackendAPIURL}cart/delete/${cartItem.id}`);
       if (response) {
         setOrderSubmitted(true);
@@ -123,7 +133,7 @@ const CartPage: React.FC = () => {
 
       {loading ? (
         <p>Loading...</p>
-      ) : cartItems && cartItems.cart_items.length > 0 ? (
+      ) : cartItems.cart_items.length > 0 ? (
         cartItems.cart_items.map((cartItem) => {
           const product = cartItems.product_info.find(
             (product) => product.id === cartItem.product
@@ -137,12 +147,14 @@ const CartPage: React.FC = () => {
                     {product ? product.name : "Unknown Product"}
                   </h3>
 
-                  {product &&
-                  productImages[product.id] &&
-                  productImages[product.id].length > 0 ? (
+                  {productImages[product?.id ?? 0] &&
+                  productImages[product?.id ?? 0].length > 0 ? (
                     <img
-                      src={BackendServerURL + productImages[product.id][0].img}
-                      alt={product.name}
+                      src={
+                        BackendServerURL +
+                        productImages[product?.id ?? 0][0].img
+                      }
+                      alt={product ? product.name : "Image"}
                       style={{ width: "150px" }}
                     />
                   ) : (
@@ -171,7 +183,7 @@ const CartPage: React.FC = () => {
       ) : (
         <p>No items in the cart.</p>
       )}
-      <h3>Total price is ${cartItems?.total_price}</h3>
+      <h3>Total price is ${cartItems.total_price}</h3>
     </div>
   );
 };

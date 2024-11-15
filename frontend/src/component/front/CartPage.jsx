@@ -16,6 +16,7 @@ const CartPage = () => {
   //fetch pic using CartItem id
   useEffect(() => {
     const fetchCartItems = async () => {
+      //可新增一次結帳全部的功能
       if (usr_id) {
         try {
           const res = await axios.get(`${BackendAPIURL}cart/view/${usr_id}`);

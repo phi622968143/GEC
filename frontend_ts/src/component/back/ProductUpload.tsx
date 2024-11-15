@@ -9,6 +9,7 @@ const ProductUpload: React.FC = () => {
     setSkillLevel(e.target.value);
   };
 
+  // Function to determine background color based on the selected skill level
   const getSkillBackgroundColor = (): string => {
     switch (skillLevel) {
       case "beginner":
@@ -18,7 +19,7 @@ const ProductUpload: React.FC = () => {
       case "advanced":
         return "bg-red-500";
       default:
-        return "bg-white";
+        return "bg-white"; // Default background color
     }
   };
 
@@ -26,6 +27,7 @@ const ProductUpload: React.FC = () => {
     setCategory(e.target.value);
   };
 
+  // Function to determine background color based on the selected category
   const getCategoryBackgroundColor = (): string => {
     switch (category) {
       case "1":
@@ -37,15 +39,17 @@ const ProductUpload: React.FC = () => {
       case "4":
         return "bg-blue-500";
       default:
-        return "bg-white";
+        return "bg-white"; // Default background color
     }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.target as HTMLFormElement);
+
+    const formData = new FormData(event.currentTarget); // Collect data from form
 
     try {
+      // Step 1: Post Product Data
       const productData = new FormData();
       productData.append("name", formData.get("name") as string);
       productData.append("price", formData.get("price") as string);
@@ -64,35 +68,59 @@ const ProductUpload: React.FC = () => {
           },
         }
       );
+      //alert("Product upload successful!");
+      console.log("Product Uploaded:", productResponse.data);
 
       const productId = productResponse.data.id;
 
+      // Step 2: Post Product Image
       const imageData = new FormData();
-      imageData.append("product", productId);
+      imageData.append("product", productId.toString()); // Include the product ID
       imageData.append("img", formData.get("img") as File);
       imageData.append("primary", formData.get("primary") ? "true" : "false");
 
-      await axios.post("http://127.0.0.1:8000/api/img/post", imageData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const imageResponse = await axios.post(
+        "http://127.0.0.1:8000/api/img/post",
+        imageData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      //alert("Image upload successful!");
+      console.log("Image Uploaded:", imageResponse.data);
 
-      const audioData = new FormData();
-      audioData.append("product", productId);
-      audioData.append("equipment", formData.get("equipment") as string);
-      audioData.append("audio", formData.get("audio") as File);
+      // Step 3: Post Product Audio (Only if audio is provided)
+      const audioFile = formData.get("audio") as File;
+      if (audioFile) {
+        const audioData = new FormData();
+        audioData.append("product", productId.toString()); // Include the product ID
+        audioData.append("equipment", formData.get("equipment") as string);
+        audioData.append("audio", audioFile);
 
-      await axios.post("http://127.0.0.1:8000/api/audio/post", audioData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+        try {
+          const audioResponse = await axios.post(
+            "http://127.0.0.1:8000/api/audio/post",
+            audioData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+          console.log("Audio Uploaded:", audioResponse.data);
+          alert("Audio upload successful!");
+        } catch (audioError) {
+          console.error("Error uploading audio:", audioError);
+          //alert("There was an error uploading the audio. Please try again.");
+        }
+      }
 
-      alert("All uploads were successful!");
-      window.location.href = "http://localhost:1140/";
+      window.location.href = " http://localhost:3920/list";
     } catch (error) {
       console.error("Error:", error);
+      alert("There was an error uploading the product. Please try again.");
     }
   };
 
@@ -100,6 +128,11 @@ const ProductUpload: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       console.log(file.name);
+      if (file.size > 20000000) {
+        // 20MB file size limit
+        alert("File size too large!");
+        return;
+      }
     }
   };
 
@@ -114,10 +147,8 @@ const ProductUpload: React.FC = () => {
           <div className="bg-white shadow-zinc-300 shadow-lg p-5 m-1 rounded border border-zinc-700">
             <h1 className="text-2xl">Upload Product</h1>
           </div>
-
           <div className="bg-white shadow-zinc-300 shadow-lg p-5 m-1 rounded border border-zinc-700">
             <h2>Product Information</h2>
-
             <div>
               <label htmlFor="name">Name:</label>
               <input
@@ -128,7 +159,7 @@ const ProductUpload: React.FC = () => {
                 required
               />
             </div>
-
+            <br />
             <div>
               <label htmlFor="price">Price:</label>
               <input
@@ -139,7 +170,7 @@ const ProductUpload: React.FC = () => {
                 required
               />
             </div>
-
+            <br />
             <div>
               <label htmlFor="brand">Brand:</label>
               <input
@@ -150,7 +181,7 @@ const ProductUpload: React.FC = () => {
                 required
               />
             </div>
-
+            <br />
             <div>
               <label htmlFor="num">Number:</label>
               <input
@@ -161,16 +192,17 @@ const ProductUpload: React.FC = () => {
                 required
               />
             </div>
-
+            <br />
             <div>
               <label>Description (File):</label>
               <input
                 type="file"
                 onChange={handleFileChange}
+                name="description"
                 className="hover:file:cursor-pointer block w-1/2 text-sm file:bg-green-500 file:text-white file:px-4 file:py-2 file:rounded file:mt-4 hover:file:bg-green-600"
               />
             </div>
-
+            <br />
             <div>
               <label htmlFor="skill_lv">Skill Level:</label>
               <select
@@ -186,7 +218,7 @@ const ProductUpload: React.FC = () => {
                 <option value="advanced">Advanced</option>
               </select>
             </div>
-
+            <br />
             <div>
               <label htmlFor="category">Category:</label>
               <select
@@ -204,7 +236,7 @@ const ProductUpload: React.FC = () => {
               </select>
             </div>
           </div>
-
+          <br />
           <div className="bg-white shadow-zinc-300 shadow-lg p-5 m-1 rounded border border-zinc-700">
             <h2>Upload Product Image</h2>
             <div>
@@ -217,13 +249,13 @@ const ProductUpload: React.FC = () => {
                 required
               />
             </div>
-
+            <br />
             <div>
               <label htmlFor="primary">Primary Image:</label>
               <input type="checkbox" id="primary" name="primary" />
             </div>
           </div>
-
+          <br />
           <div className="bg-white shadow-zinc-300 shadow-lg p-5 m-1 rounded border border-zinc-700">
             <h2>Upload Product Audio</h2>
             <div>
@@ -235,7 +267,7 @@ const ProductUpload: React.FC = () => {
                 className="border-solid p-2 rounded border border-zinc-700"
               />
             </div>
-
+            <br />
             <div>
               <label htmlFor="audio">Audio (File):</label>
               <input
@@ -246,12 +278,12 @@ const ProductUpload: React.FC = () => {
               />
             </div>
           </div>
-
+          <br />
           <button
             type="submit"
-            className="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600"
+            className="text-white bg-green-500 hover:bg-green-600 px-4 py-2 rounded"
           >
-            Upload Product
+            Submit
           </button>
         </form>
       </div>

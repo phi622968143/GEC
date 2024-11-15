@@ -4,6 +4,7 @@ import React, { useState } from "react";
 const ProductUpload = () => {
   const [skillLevel, setSkillLevel] = useState("");
   const [category, setCategory] = useState("");
+
   const handleSkillChange = (e) => {
     setSkillLevel(e.target.value);
   };
@@ -21,6 +22,7 @@ const ProductUpload = () => {
         return "bg-white"; // Default background color
     }
   };
+
   const handleCategoryChange = (e) => {
     setCategory(e.target.value);
   };
@@ -40,14 +42,14 @@ const ProductUpload = () => {
         return "bg-white"; // Default background color
     }
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const formData = new FormData(event.target);
+    const formData = new FormData(event.target); // Collect data from form
 
     try {
-      //get data from form and post
-      // Post product data
+      // Step 1: Post Product Data
       const productData = new FormData();
       productData.append("name", formData.get("name"));
       productData.append("price", formData.get("price"));
@@ -66,13 +68,12 @@ const ProductUpload = () => {
           },
         }
       );
-      alert("product upload successful! go in to demo!");
+      //alert("Product upload successful!");
       console.log("Product Uploaded:", productResponse.data);
 
-      // Get the product ID from the response
       const productId = productResponse.data.id;
 
-      // Post product image
+      // Step 2: Post Product Image
       const imageData = new FormData();
       imageData.append("product", productId); // Include the product ID
       imageData.append("img", formData.get("img"));
@@ -87,30 +88,39 @@ const ProductUpload = () => {
           },
         }
       );
-      alert("image upload successful! go in to demo!");
+      //alert("Image upload successful!");
       console.log("Image Uploaded:", imageResponse.data);
 
-      // Post product audio
-      const audioData = new FormData();
-      audioData.append("product", productId); // Include the product ID
-      audioData.append("equipment", formData.get("equipment"));
-      audioData.append("audio", formData.get("audio"));
+      // Step 3: Post Product Audio (Only if audio is provided)
+      const audioFile = formData.get("audio");
+      if (audioFile) {
+        const audioData = new FormData();
+        audioData.append("product", productId); // Include the product ID
+        audioData.append("equipment", formData.get("equipment"));
+        audioData.append("audio", audioFile);
 
-      const audioResponse = await axios.post(
-        "http://127.0.0.1:8000/api/audio/post",
-        audioData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+        try {
+          const audioResponse = await axios.post(
+            "http://127.0.0.1:8000/api/audio/post",
+            audioData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+          console.log("Audio Uploaded:", audioResponse.data);
+          alert("Audio upload successful!");
+        } catch (audioError) {
+          console.error("Error uploading audio:", audioError);
+          //alert("There was an error uploading the audio. Please try again.");
         }
-      );
+      }
 
-      console.log("Audio Uploaded:", audioResponse.data);
-      alert("audio upload successful! go in to demo!");
-      window.location.href = " http://localhost:1140/";
+      window.location.href = " http://localhost:1140/list";
     } catch (error) {
       console.error("Error:", error);
+      alert("There was an error uploading the product. Please try again.");
     }
   };
 
@@ -118,6 +128,11 @@ const ProductUpload = () => {
     const file = e.target.files[0];
     if (file) {
       console.log(file.name);
+      if (file.size > 20000000) {
+        // 5MB file size limit
+        alert("File size too large!");
+        return;
+      }
     }
   };
 
@@ -125,12 +140,12 @@ const ProductUpload = () => {
     <div className="p-14 bg-zinc-200">
       <div>
         <form
-          id="product-form "
+          id="product-form"
           className="border-solid p-3"
           onSubmit={handleSubmit}
         >
           <div className="bg-white shadow-zinc-300 shadow-lg p-5 m-1 rounded border border-zinc-700">
-            <h1 className=" text-2xl ">Upload Product</h1>
+            <h1 className="text-2xl">Upload Product</h1>
           </div>
           <div className="bg-white shadow-zinc-300 shadow-lg p-5 m-1 rounded border border-zinc-700">
             <h2>Product Information</h2>
@@ -145,7 +160,6 @@ const ProductUpload = () => {
               />
             </div>
             <br />
-
             <div>
               <label htmlFor="price">Price:</label>
               <input
@@ -157,7 +171,6 @@ const ProductUpload = () => {
               />
             </div>
             <br />
-
             <div>
               <label htmlFor="brand">Brand:</label>
               <input
@@ -169,7 +182,6 @@ const ProductUpload = () => {
               />
             </div>
             <br />
-
             <div>
               <label htmlFor="num">Number:</label>
               <input
@@ -181,17 +193,16 @@ const ProductUpload = () => {
               />
             </div>
             <br />
-
             <div>
               <label>Description (File):</label>
               <input
                 type="file"
                 onChange={handleFileChange}
+                name="description"
                 className="hover:file:cursor-pointer block w-1/2 text-sm file:bg-green-500 file:text-white file:px-4 file:py-2 file:rounded file:mt-4 hover:file:bg-green-600"
               />
             </div>
             <br />
-
             <div>
               <label htmlFor="skill_lv">Skill Level:</label>
               <select
@@ -200,7 +211,7 @@ const ProductUpload = () => {
                 required
                 value={skillLevel}
                 onChange={handleSkillChange}
-                className={`border-solid p-2 rounded border border-zinc-700 text-white ${getSkillBackgroundColor()}`} // Dynamically change background color
+                className={`border-solid p-2 rounded border border-zinc-700 text-white ${getSkillBackgroundColor()}`}
               >
                 <option value="beginner">Beginner</option>
                 <option value="intermediate">Intermediate</option>
@@ -208,7 +219,6 @@ const ProductUpload = () => {
               </select>
             </div>
             <br />
-
             <div>
               <label htmlFor="category">Category:</label>
               <select
@@ -227,7 +237,6 @@ const ProductUpload = () => {
             </div>
           </div>
           <br />
-
           <div className="bg-white shadow-zinc-300 shadow-lg p-5 m-1 rounded border border-zinc-700">
             <h2>Upload Product Image</h2>
             <div>
@@ -241,14 +250,12 @@ const ProductUpload = () => {
               />
             </div>
             <br />
-
             <div>
               <label htmlFor="primary">Primary Image:</label>
               <input type="checkbox" id="primary" name="primary" />
             </div>
           </div>
           <br />
-
           <div className="bg-white shadow-zinc-300 shadow-lg p-5 m-1 rounded border border-zinc-700">
             <h2>Upload Product Audio</h2>
             <div>
@@ -261,7 +268,6 @@ const ProductUpload = () => {
               />
             </div>
             <br />
-
             <div>
               <label htmlFor="audio">Audio (File):</label>
               <input
@@ -275,9 +281,9 @@ const ProductUpload = () => {
           <br />
           <button
             type="submit"
-            className="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600"
+            className="text-white bg-green-500 hover:bg-green-600 px-4 py-2 rounded"
           >
-            Upload Product
+            Submit
           </button>
         </form>
       </div>

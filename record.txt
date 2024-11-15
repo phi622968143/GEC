@@ -65,8 +65,12 @@ Oct 9={
 OCT 11 ={ respberry pi and remote }
 
 OCT 22={postorder success!,find in api/order/post,}
+
 OCT 26={
    check out and delete in cart v ,
    see handledeal I used prompt to let using key in number 
    and then pass the paymethod , you can beauty the UI of the alert box
+}
+NOV 14={
+   Order patch and del
 }
