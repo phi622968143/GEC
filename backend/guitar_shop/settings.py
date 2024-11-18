@@ -12,8 +12,11 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-import os
+GOA_K=os.getenv("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
+GOA_S=os.getenv("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,6 +51,7 @@ INSTALLED_APPS = [
     "back",
     "rest_framework",
     "corsheaders",
+    "social_django",
 ]
 
 MIDDLEWARE = [
@@ -59,6 +63,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "social_django.middleware.SocialAuthExceptionMiddleware",
 ]
 
 ROOT_URLCONF = "guitar_shop.urls"
@@ -110,6 +115,20 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+# Add your Google OAuth2 credentials
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = GOA_K
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = GOA_S
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+
+LOGIN_URL = '/accounts/auth/login/google-oauth2/'  # Correct login URL for OAuth
+LOGIN_REDIRECT_URL = 'http://localhost:1140/'  # Where to redirect after login
+LOGOUT_REDIRECT_URL = 'http://localhost:1140/'  # Where to redirect after logout
+
 
 
 # Internationalization
@@ -134,6 +153,6 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  
+    "http://localhost:1140", "http://localhost:3920"
 #     "https://yourfrontenddomain.com",  # 你的生产环境前端域名
 ]

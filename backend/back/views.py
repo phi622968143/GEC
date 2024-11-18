@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Product,ProductImg,ProductAudio,Customer,CartItem
@@ -8,7 +8,10 @@ from django.core.files.storage import default_storage
 from .process_audio import process_audio
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.views.decorators.csrf import csrf_exempt
-#Back
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+
+#Back-containing Product info Ops
 @api_view(['GET'])
 def GetProduct(request):
     try:
@@ -40,22 +43,6 @@ def GetAudio(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['GET'])
-def GetOrder(request):
-    try:
-        orders = Order.objects.all()
-        serializer = OrderSerializer(orders, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-@api_view(['GET'])
-def GetOrderDetail(request,id):
-    try:
-        orders = OrderDetail.objects.get(order=id)
-        serializer = OrderDetailSerializer(orders)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 def PostProduct(req):
@@ -101,23 +88,6 @@ def PostAudio(req):
     product_audio.save()
     
     return Response(status=status.HTTP_201_CREATED)
-@api_view(['POST'])
-def PostOrder(req):
-    order=req.data.copy()
-    order_detail=order.pop("order_details") #get detail
-    order_serializer = OrderSerializer(data=order)
-    if order_serializer.is_valid():
-        order = order_serializer.save()
-        order_detail['order']=order.id       #relation #single obj
-        detail_serializer = OrderDetailSerializer(data=order_detail)
-        
-        if detail_serializer.is_valid():
-            detail_serializer.save()
-            return Response(status=status.HTTP_201_CREATED)
-        else:
-            raise serializers.ValidationError(detail_serializer.errors)
-    else:
-        raise serializers.ValidationError(detail_serializer.errors) 
 
 @api_view(['PATCH'])
 def PatchPic(req,id):
@@ -284,7 +254,52 @@ def delete_cart_item(req,item_id):
     except CartItem.DoesNotExist:
         return Response({'error': 'Item not found or does not belong to the user.'}, status=status.HTTP_404_NOT_FOUND)
 
+@api_view(['POST'])
+def PostOrder(req):
+    order=req.data.copy()
+    order_detail=order.pop("order_details") #get detail
+    order_serializer = OrderSerializer(data=order)
+    if order_serializer.is_valid():
+        order = order_serializer.save()
+        order_detail['order']=order.id       #relation #single obj
+        detail_serializer = OrderDetailSerializer(data=order_detail)
+        
+        if detail_serializer.is_valid():
+            detail_serializer.save()
+            return Response(status=status.HTTP_201_CREATED)
+        else:
+            raise serializers.ValidationError(detail_serializer.errors)
+    else:
+        raise serializers.ValidationError(detail_serializer.errors) 
 
+@api_view(['GET'])
+def GetOrder(request):
+    try:
+        orders = Order.objects.all()
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def GetOrderDetail(request,id):
+    try:
+        orders = OrderDetail.objects.get(order=id)
+        serializer = OrderDetailSerializer(orders)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_info(request, id):
+    try:
+        customer = get_object_or_404(Customer, id=id)
+        return Response({"name": customer.FN}, status=status.HTTP_200_OK)
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    
 #OAuth
 #check out(ECPAY TEST)
 

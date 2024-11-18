@@ -22,6 +22,7 @@ from back.urls import urlpatterns as BackURL
 urlpatterns = [
     path('', include(BackURL)), 
     path('admin/', admin.site.urls),
+    path('accounts/', include('social_django.urls', namespace='social')), 
    
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

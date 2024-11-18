@@ -27,4 +27,5 @@ urlpatterns = [
     path('api/cart/view/<int:usr_id>',views.view_cart,name="view_cart"),
     path('api/cart/delete/<int:item_id>',views.delete_cart_item,name="delete_cart_item"),
     
+    path('api/login/<int:id>',views.user_info,name="user_info"),
 ]

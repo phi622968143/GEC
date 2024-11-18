@@ -74,3 +74,11 @@ OCT 26={
 NOV 14={
    Order patch and del
 }
+NOV 16 ={
+   progress:adding NoPage,Rearrange routes add AdminLayout in back,
+   TODO:USER SYSTEM,component REDESIGN,
+   study:named unamed export
+}
+NOV 19 ={
+   OAuth login
+}
