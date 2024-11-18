@@ -123,10 +123,10 @@ AUTHENTICATION_BACKENDS = (
 # Add your Google OAuth2 credentials
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = GOA_K
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = GOA_S
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+# SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 
 LOGIN_URL = '/accounts/auth/login/google-oauth2/'  # Correct login URL for OAuth
-LOGIN_REDIRECT_URL = 'http://localhost:1140/'  # Where to redirect after login
+LOGIN_REDIRECT_URL = 'http://localhost:1140/products'  # Where to redirect after login
 LOGOUT_REDIRECT_URL = 'http://localhost:1140/'  # Where to redirect after logout
 
 
